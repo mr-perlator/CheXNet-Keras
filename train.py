@@ -11,7 +11,7 @@ from keras.utils import multi_gpu_model
 from models.keras import ModelFactory
 from utility import get_sample_counts
 from weights import get_class_weights
-from augmenter import augmenter
+# from augmenter import augmenter
 
 
 def main():
@@ -144,7 +144,7 @@ def main():
             source_image_dir=image_source_dir,
             batch_size=batch_size,
             target_size=(image_dimension, image_dimension),
-            augmenter=augmenter,
+            augmenter=None,
             steps=train_steps,
         )
         validation_sequence = AugmentedImageSequence(
@@ -153,7 +153,7 @@ def main():
             source_image_dir=image_source_dir,
             batch_size=batch_size,
             target_size=(image_dimension, image_dimension),
-            augmenter=augmenter,
+            augmenter=None,
             steps=validation_steps,
             shuffle_on_epoch_end=False,
         )

@@ -5,16 +5,25 @@ import pickle
 from callback import MultipleClassAUROC, MultiGPUModelCheckpoint
 from configparser import ConfigParser
 from generator import AugmentedImageSequence
-from keras.callbacks import ModelCheckpoint, TensorBoard, ReduceLROnPlateau
-from keras.optimizers import Adam
-from keras.utils import multi_gpu_model
+from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard, ReduceLROnPlateau
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import multi_gpu_model
 from models.keras import ModelFactory
 from utility import get_sample_counts
 from weights import get_class_weights
 # from augmenter import augmenter
 
+from keras.backend.tensorflow_backend import set_session
+import tensorflow as tf
+
 
 def main():
+    config = tf.compat.v1.ConfigProto()
+    config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+    config.log_device_placement = True  # to log device placement (on which device the operation ran)
+    sess = tf.compat.v1.Session(config=config)
+    set_session(sess)  # set this TensorFlow session as the default session for Keras
+
     # parser config
     config_file = "./config.ini"
     cp = ConfigParser()
@@ -28,6 +37,7 @@ def main():
 
     # train config
     use_base_model_weights = cp["TRAIN"].getboolean("use_base_model_weights")
+    base_model_weights_file = cp["TRAIN"].get("base_weights")
     use_trained_model_weights = cp["TRAIN"].getboolean("use_trained_model_weights")
     use_best_weights = cp["TRAIN"].getboolean("use_best_weights")
     output_weights_name = cp["TRAIN"].get("output_weights_name")
@@ -58,29 +68,34 @@ def main():
         training_stats = {}
 
     show_model_summary = cp["TRAIN"].getboolean("show_model_summary")
+
+    # label handling
+    label_handling = {"empty": cp["LABEL"].get("empty")}
+    for class_name in class_names:
+        label_handling[class_name] = cp["LABEL"].get(class_name)
     # end parser config
 
     # check output_dir, create it if not exists
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
-
+    """
     running_flag_file = os.path.join(output_dir, ".training.lock")
     if os.path.isfile(running_flag_file):
         raise RuntimeError("A process is running in this directory!!!")
     else:
         open(running_flag_file, "a").close()
-
+    """
     try:
         print(f"backup config file to {output_dir}")
         shutil.copy(config_file, os.path.join(output_dir, os.path.split(config_file)[1]))
 
-        datasets = ["train", "dev", "test"]
+        datasets = ["train", "valid"]
         for dataset in datasets:
             shutil.copy(os.path.join(dataset_csv_dir, f"{dataset}.csv"), output_dir)
 
         # get train/dev sample counts
         train_counts, train_pos_counts = get_sample_counts(output_dir, "train", class_names)
-        dev_counts, _ = get_sample_counts(output_dir, "dev", class_names)
+        dev_counts, _ = get_sample_counts(output_dir, "valid", class_names)
 
         # compute steps
         if train_steps == "auto":
@@ -123,8 +138,9 @@ def main():
                 model_weights_file = os.path.join(output_dir, f"best_{output_weights_name}")
             else:
                 model_weights_file = os.path.join(output_dir, output_weights_name)
+
         else:
-            model_weights_file = None
+            model_weights_file = base_model_weights_file
 
         model_factory = ModelFactory()
         model = model_factory.get_model(
@@ -148,7 +164,7 @@ def main():
             steps=train_steps,
         )
         validation_sequence = AugmentedImageSequence(
-            dataset_csv_file=os.path.join(output_dir, "dev.csv"),
+            dataset_csv_file=os.path.join(output_dir, "valid.csv"),
             class_names=class_names,
             source_image_dir=image_source_dir,
             batch_size=batch_size,
@@ -157,6 +173,8 @@ def main():
             steps=validation_steps,
             shuffle_on_epoch_end=False,
         )
+
+        #print(train_sequence.next())
 
         output_weights_path = os.path.join(output_dir, output_weights_name)
         print(f"** set output weights path to: {output_weights_path} **")
@@ -192,7 +210,7 @@ def main():
         )
         callbacks = [
             checkpoint,
-            TensorBoard(log_dir=os.path.join(output_dir, "logs"), batch_size=batch_size),
+            #TensorBoard(log_dir=os.path.join(output_dir, "logs"), batch_size=batch_size),
             ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=patience_reduce_lr,
                               verbose=1, mode="min", min_lr=min_lr),
             auroc,
@@ -221,7 +239,8 @@ def main():
         print("** done! **")
 
     finally:
-        os.remove(running_flag_file)
+        # os.remove(running_flag_file)
+        print("** done! **")
 
 
 if __name__ == "__main__":

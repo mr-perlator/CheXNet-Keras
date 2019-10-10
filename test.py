@@ -33,7 +33,7 @@ def main():
     best_weights_path = os.path.join(output_dir, f"best_{output_weights_name}")
 
     # get test sample count
-    test_counts, _ = get_sample_counts(output_dir, "test", class_names)
+    test_counts, _ = get_sample_counts(output_dir, "valid", class_names)
 
     # compute steps
     if test_steps == "auto":
@@ -64,7 +64,7 @@ def main():
 
     print("** load test generator **")
     test_sequence = AugmentedImageSequence(
-        dataset_csv_file=os.path.join(output_dir, "dev.csv"),
+        dataset_csv_file=os.path.join(output_dir, "valid.csv"),
         class_names=class_names,
         source_image_dir=image_source_dir,
         batch_size=batch_size,

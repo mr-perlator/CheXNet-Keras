@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import pandas as pd
-from keras.utils import Sequence
+from tensorflow.keras.utils import Sequence
 from PIL import Image
 from skimage.transform import resize
 
@@ -84,6 +84,10 @@ class AugmentedImageSequence(Sequence):
     def prepare_dataset(self):
         df = self.dataset_df.sample(frac=1., random_state=self.random_state)
         self.x_path, self.y = df["Path"].to_numpy(), df[self.class_names].to_numpy()
+        # strategies for dealing with empty fields and uncertainty labels (-1)
+        # fill empty fields with 0, uncertainty label replaced with 1
+        self.y = np.nan_to_num(self.y)
+        self.y[self.y == -1] = 1
 
     def on_epoch_end(self):
         if self.shuffle:

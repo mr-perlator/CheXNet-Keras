@@ -1,7 +1,7 @@
 import importlib
-from keras.layers import Input
-from keras.layers.core import Dense
-from keras.models import Model
+from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Model
 
 
 class ModelFactory:
@@ -69,7 +69,7 @@ class ModelFactory:
 
         base_model_class = getattr(
             importlib.import_module(
-                f"keras.applications.{self.models_[model_name]['module_name']}"
+                f"tensorflow.keras.applications.{self.models_[model_name]['module_name']}"
             ),
             model_name)
 
@@ -93,5 +93,11 @@ class ModelFactory:
 
         if weights_path is not None:
             print(f"load model weights_path: {weights_path}")
-            model.load_weights(weights_path)
+            model.load_weights(weights_path, by_name=True)
+
+        """# make feature extractors not trainable
+        for l in model.layers:
+            if not l.name == "predictions":
+                l.trainable = False
+        """
         return model

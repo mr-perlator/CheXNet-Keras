@@ -8,5 +8,6 @@ densenet121_weights_tf.h5
 /data/Data_Entry_2017.csv
 /data/BBox_List_2017.csv
 venv
+densenet121_weights_base.h5
 config.ini
 *.pdf

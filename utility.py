@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import pandas as pd
+from configparser import ConfigParser
 
 
 def get_sample_counts(output_dir, dataset, class_names):
@@ -17,8 +18,17 @@ def get_sample_counts(output_dir, dataset, class_names):
     class_positive_counts - dict of int, ex: {"Effusion": 300, "Infiltration": 500 ...}
     """
     df = pd.read_csv(os.path.join(output_dir, f"{dataset}.csv"))
+    # same strategy for dealing with missing/uncertain labels
+    df = df.fillna(0)
+    df = df.replace(to_replace=-1, value=1)
+
     total_count = df.shape[0]
-    labels = df[class_names].as_matrix()
+    labels = df[class_names].values
     positive_counts = np.sum(labels, axis=0)
     class_positive_counts = dict(zip(class_names, positive_counts))
     return total_count, class_positive_counts
+
+
+def preprocess_labels(df):
+
+    return df

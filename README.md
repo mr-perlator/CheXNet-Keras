@@ -24,7 +24,7 @@ ChexNet is a deep learning algorithm that can detect and localize 14 kinds of di
 7. Create a `./data/cam` folder to specify images for custom class activation maps or change config.ini accordingly
 7. Run `python cam.py` to generate images with class activation mapping overlay. CAM images will be placed under the output folder.
 
-## Author of original repository
+## Author
 Aleksej Perlov (aleksej.perlov@gmail.com), after fork from Bruce Chou (brucechou1983@gmail.com)
 
 ## License

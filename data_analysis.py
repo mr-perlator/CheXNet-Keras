@@ -21,6 +21,7 @@ def main():
     train_df = pd.read_csv(trainfile)
     # validation_df = pd.read_csv(validationfile)
     processed_train_df = preprocess_labels(train_df, label_handling, class_names)
+    # print(label_handling["empty"])
 
     filenum = train_df.shape[0]
     for class_name in class_names:
@@ -28,9 +29,6 @@ def main():
         print(f"labeled: {str(train_df[class_name].count())}")
         print(f"NaN: {str(filenum - train_df[class_name].count())}")
         print(f"labeled counts: \n{str(train_df[class_name].value_counts())}")
-        """print(f"-1: {str(train_df[class_name].count(-1))}")
-        print(f"0: {str(train_df[class_name].count(0))}")
-        print(f"1: {str(train_df[class_name].count(1))}")"""
         print(f"uncertain label policy: {label_handling[class_name]}")
         print(f"counts after preprocessing: \n{str(processed_train_df[class_name].value_counts())}")
 

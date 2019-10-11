@@ -36,7 +36,7 @@ def preprocess_labels(df, label_handling, class_names):
         new_df = df.fillna(1)
     for class_name in class_names:
         if label_handling[class_name] == "zeros":
-            new_df[class_name] = df[class_name].replace(to_replace=-1, value=0)
+            new_df[class_name] = new_df[class_name].replace(to_replace=-1, value=0)
         elif label_handling[class_name] == "ones":
-            new_df[class_name] = df[class_name].replace(to_replace=-1, value=1)
+            new_df[class_name] = new_df[class_name].replace(to_replace=-1, value=1)
     return new_df

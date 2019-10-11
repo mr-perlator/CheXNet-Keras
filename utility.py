@@ -29,6 +29,14 @@ def get_sample_counts(output_dir, dataset, class_names):
     return total_count, class_positive_counts
 
 
-def preprocess_labels(df):
-
-    return df
+def preprocess_labels(df, label_handling, class_names):
+    if label_handling["empty"] == "zeros":
+        new_df = df.fillna(0)
+    elif label_handling["empty"] == "ones":
+        new_df = df.fillna(1)
+    for class_name in class_names:
+        if label_handling[class_name] == "zeros":
+            new_df[class_name] = df[class_name].replace(to_replace=-1, value=0)
+        elif label_handling[class_name] == "ones":
+            new_df[class_name] = df[class_name].replace(to_replace=-1, value=1)
+    return new_df

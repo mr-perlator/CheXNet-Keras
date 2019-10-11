@@ -141,6 +141,7 @@ def main():
 
         else:
             model_weights_file = base_model_weights_file
+            use_base_model_weights = False
 
         model_factory = ModelFactory()
         model = model_factory.get_model(

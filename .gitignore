@@ -1,6 +1,7 @@
 .python-version
 densenet121_weights_tf.h5
 /data/CheXpert-v1.0-small
+/data/cam
 /**/__pycache__
 /data/images
 /.idea
